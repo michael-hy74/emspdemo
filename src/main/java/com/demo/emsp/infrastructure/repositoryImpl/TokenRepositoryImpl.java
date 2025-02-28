@@ -1,0 +1,83 @@
+package com.demo.emsp.infrastructure.repositoryImpl;
+
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.demo.emsp.domain.entity.Token;
+import com.demo.emsp.domain.repository.TokenRepository;
+import com.demo.emsp.domain.values.TokenId;
+import com.demo.emsp.infrastructure.mapper.TokenPOMapper;
+import com.demo.emsp.infrastructure.po.TokenPO;
+import com.demo.emsp.infrastructure.services.TokenPOService;
+import com.demo.emsp.infrastructure.utils.ConvertUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+
+import java.time.LocalDateTime;
+import java.util.Optional;
+
+@Repository
+public class TokenRepositoryImpl implements TokenRepository {
+
+    @Autowired
+    TokenPOService tokenPOService;
+
+    @Autowired
+    TokenPOMapper tokenPOMapper;
+
+    @Override
+    public Optional<Token> save(Token token) {
+        TokenPO tokenPO = ConvertUtils.tokenDomainToPo(token);
+        boolean tokenSaved = tokenPOService.save(tokenPO);
+        return tokenSaved ? Optional.of(ConvertUtils.tokenPOToDomain(tokenPO)) : Optional.empty();
+    }
+
+    @Override
+    public Optional<Token> update(Token token) {
+
+        TokenPO tokenPO = tokenPOService.getById(token.getId());
+        tokenPO.setTokenStatus(token.getTokenStatus().toString());
+
+        LambdaQueryWrapper<TokenPO> query = new LambdaQueryWrapper();
+        query.eq(TokenPO::getId, token.getId());
+        boolean accountSaved = tokenPOService.update(tokenPO, query);
+        return accountSaved ? Optional.of(ConvertUtils.tokenPOToDomain(tokenPO)) : Optional.empty();
+    }
+
+    @Override
+    public Optional<Token> findById(TokenId id) {
+        TokenPO tokenPO = tokenPOService.getById(id.getValue());
+        Token token = ConvertUtils.tokenPOToDomain(tokenPO);
+        return Optional.of(token);
+    }
+
+    @Override
+    public Optional<Token> assignToken(Token token) {
+        TokenPO tokenPO = tokenPOService.getById(token.getId());
+        tokenPO.setAssignedDate(LocalDateTime.now());
+        tokenPO.setAccountId(token.getAccountId().getValue());
+        tokenPO.setTokenStatus(token.getTokenStatus().toString());
+
+        LambdaQueryWrapper<TokenPO> query = new LambdaQueryWrapper();
+        query.eq(TokenPO::getId, token.getId());
+        boolean accountSaved = tokenPOService.update(tokenPO, query);
+        return accountSaved ? Optional.of(ConvertUtils.tokenPOToDomain(tokenPO)) : Optional.empty();
+    }
+
+    @Override
+    public IPage<Token> findTokenByLastUpdate(LocalDateTime startTime, LocalDateTime endTime, Integer page, Integer size) {
+        Page<TokenPO> tokenPOPage = new Page<>(page, size);
+
+        QueryWrapper<TokenPO> queryWrapper = new QueryWrapper<>();
+        if (startTime != null) {
+            queryWrapper.ge("last_updated", startTime);
+        }
+        if (endTime != null) {
+            queryWrapper.le("last_updated", endTime);
+        }
+        Page<TokenPO> poPage = tokenPOMapper.selectPage(tokenPOPage, queryWrapper);
+        return poPage.convert(ConvertUtils::tokenPOToDomain);
+    }
+
+}
