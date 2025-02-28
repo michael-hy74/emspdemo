@@ -3,9 +3,11 @@ package com.demo.emsp.application.controller;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.demo.emsp.application.dto.AccountDTO;
 import com.demo.emsp.application.services.AccountAppService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -18,7 +20,7 @@ public class AccountController {
     private AccountAppService accountAppService;
 
     @PostMapping
-    public ResponseEntity<AccountDTO> createAccount(@RequestBody AccountDTO accountDTO) {
+    public ResponseEntity<AccountDTO> createAccount(@RequestBody @Valid AccountDTO accountDTO) {
         AccountDTO dto = accountAppService.createAccount(accountDTO);
         return ResponseEntity.ok(dto);
     }

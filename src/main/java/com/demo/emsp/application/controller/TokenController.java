@@ -3,9 +3,11 @@ package com.demo.emsp.application.controller;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.demo.emsp.application.dto.TokenDTO;
 import com.demo.emsp.application.services.TokenAppService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -18,7 +20,8 @@ public class TokenController {
     private TokenAppService tokenAppService;
 
     @PostMapping
-    public ResponseEntity<TokenDTO> createToken(@RequestBody TokenDTO tokenDTO) {
+    @Validated
+    public ResponseEntity<TokenDTO> createToken(@RequestBody @Valid TokenDTO tokenDTO) {
         TokenDTO dto = tokenAppService.createToken(tokenDTO);
         return ResponseEntity.ok(dto);
     }
