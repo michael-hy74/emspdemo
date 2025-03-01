@@ -43,8 +43,6 @@ jobs:
       with:
         context: .
         push: true
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
         tags: |
             registry.cn-hangzhou.aliyuncs.com/michael_hy/myapp:${{ github.sha }}
             registry.cn-hangzhou.aliyuncs.com/michael_hy/myapp:latest
