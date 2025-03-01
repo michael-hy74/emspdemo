@@ -22,7 +22,6 @@ public class TokenDTO {
     @NotBlank(message = "serviceId cannot be blank")
     private String contractId;
 
-    @NotBlank(message = "serviceId cannot be blank")
     private String accountId;
 
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
