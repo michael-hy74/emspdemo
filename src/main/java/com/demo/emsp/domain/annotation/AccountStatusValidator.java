@@ -13,7 +13,7 @@ public class AccountStatusValidator implements ConstraintValidator<ValidAccountS
     @Override
     public boolean isValid(String value, ConstraintValidatorContext context) {
         if (value == null) {
-            return false;
+            return true;
         }
         try {
             TokenStatus.fromString(value);

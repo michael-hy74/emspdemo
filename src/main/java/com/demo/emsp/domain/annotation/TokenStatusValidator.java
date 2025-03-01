@@ -13,7 +13,7 @@ public class TokenStatusValidator implements ConstraintValidator<ValidTokenStatu
     @Override
     public boolean isValid(String value, ConstraintValidatorContext context) {
         if (value == null) {
-            return false;
+            return true;
         }
         try {
             TokenStatus.fromString(value);
