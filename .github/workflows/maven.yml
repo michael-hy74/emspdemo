@@ -96,9 +96,9 @@ jobs:
           
           sudo docker stop myapp || echo "No running container"
           sudo docker rm myapp || echo "No existing container"
-          sudo su
-          docker pull 605134463672.dkr.ecr.ap-southeast-1.amazonaws.com/michael_hy/myapp:latest
-          docker run -d --name myapp -p 8080:8080 605134463672.dkr.ecr.ap-southeast-1.amazonaws.com/michael_hy/myapp:latest
+          
+          sudo docker pull 605134463672.dkr.ecr.ap-southeast-1.amazonaws.com/michael_hy/myapp:latest
+          sudo docker run -d --name myapp -p 8080:8080 605134463672.dkr.ecr.ap-southeast-1.amazonaws.com/michael_hy/myapp:latest
 
           # sleep 5
           # docker ps | grep myapp
