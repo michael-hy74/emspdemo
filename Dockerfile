@@ -5,7 +5,7 @@ COPY . .
 RUN mvn -B package -DskipTests
 
 
-FROM openjdk:17-jre-slim
+FROM eclipse-temurin:17-jre-jammy
 WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
 EXPOSE 8080
