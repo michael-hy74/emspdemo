@@ -25,9 +25,27 @@ jobs:
     - name: Build with Maven
       run: mvn -B package --file pom.xml
 
-    - run: mkdir staging && cp target/*.jar staging
-    - uses: actions/upload-artifact@v4
+    # - run: mkdir staging && cp target/*.jar staging
+    # - uses: actions/upload-artifact@v4
+    #   with:
+    #     name: Package
+    #     path: staging
+
+    - name: Build Docker image
+      run: |
+        docker build -t registry.cn-hangzhou.aliyuncs.com/michael_hy/myapp:0.1 .
+
+    - name: Login to Aliyun Docker Registry
+      uses: docker/login-action@v3
       with:
-        name: Package
-        path: staging
+        registry: registry.cn-hangzhou.aliyuncs.com
+        username: ${{ secrets.ALIYUN_REGISTRY_USER }}
+        password: ${{ secrets.ALIYUN_REGISTRY_PASSWORD }}
+
+    - name: Push Docker image to Aliyun ACR
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        push: true
+        tags: myapp:0.1
 
