@@ -1,9 +1,8 @@
 
-FROM maven:3.8.6-jdk-17 AS build
+FROM maven:3.8.6-eclipse-temurin-17 AS build
 WORKDIR /app
 COPY . .
 RUN mvn -B package -DskipTests
-
 
 FROM eclipse-temurin:17-jre-jammy
 WORKDIR /app
