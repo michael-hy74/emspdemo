@@ -2,10 +2,12 @@ package com.demo.emsp.domain.services;
 
 import com.demo.emsp.domain.entity.Account;
 import com.demo.emsp.domain.entity.Token;
+import com.demo.emsp.domain.enums.AccountStatus;
 import com.demo.emsp.domain.enums.TokenStatus;
 import com.demo.emsp.domain.repository.AccountRepository;
 import com.demo.emsp.domain.repository.TokenRepository;
 import com.demo.emsp.domain.values.AccountId;
+import com.demo.emsp.domain.values.ContractId;
 import com.demo.emsp.domain.values.TokenId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -34,11 +36,11 @@ public class AccountDomainService {
         accountSaved = accountRepository.findById(accountIdExisted)
                 .orElseThrow(() -> new RuntimeException("Get exist Account failed"));
 
-
         Optional.ofNullable(account.getTokens())
                 .orElse(Collections.emptyList())
                 .forEach(token -> {
                     token.setAccountId(accountIdExisted);
+                    token.setContractId(ContractId.generate(token.getTokenType()));
                     Optional<Token> tokenSaved = tokenRepository.save(token);
                     tokenSaved.orElseThrow(() -> new RuntimeException("Token saved failed"));
                 });
@@ -95,6 +97,13 @@ public class AccountDomainService {
     public Token assignToken(Token token) {
         Token tokenExist = tokenRepository.findById(new TokenId(token.getId()))
                 .orElseThrow(() -> new RuntimeException("Token Not existed"));
+
+        Account accountExist = accountRepository.findById(token.getAccountId())
+                .orElseThrow(() -> new RuntimeException("Account Not existed"));
+
+        if (accountExist.getAccountStatus() != AccountStatus.ACTIVATED) {
+            throw new IllegalStateException("Token must be assign to ACTIVATED Account.");
+        }
 
         tokenExist.setAccountId(token.getAccountId());
         tokenExist.setTokenStatus(TokenStatus.ASSIGNED);

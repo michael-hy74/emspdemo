@@ -5,6 +5,7 @@ import com.demo.emsp.application.dto.TokenDTO;
 import com.demo.emsp.domain.entity.Token;
 import com.demo.emsp.domain.repository.TokenRepository;
 import com.demo.emsp.domain.services.AccountDomainService;
+import com.demo.emsp.domain.values.ContractId;
 import com.demo.emsp.domain.values.TokenId;
 import com.demo.emsp.infrastructure.utils.ConvertUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +26,7 @@ public class TokenAppService {
     @Transactional
     public TokenDTO createToken(TokenDTO tokenDTO) {
         Token token = ConvertUtils.tokenDtoToDomain(tokenDTO);
+        token.setContractId(ContractId.generate(token.getTokenType()));
         token = tokenRepository.save(token).orElse(new Token());
         return ConvertUtils.tokenDomainToDto(token);
     }

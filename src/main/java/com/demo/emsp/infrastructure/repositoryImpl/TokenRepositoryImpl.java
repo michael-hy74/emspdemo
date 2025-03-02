@@ -30,12 +30,12 @@ public class TokenRepositoryImpl implements TokenRepository {
     public Optional<Token> save(Token token) {
         TokenPO tokenPO = ConvertUtils.tokenDomainToPo(token);
         boolean tokenSaved = tokenPOService.save(tokenPO);
-        return tokenSaved ? Optional.of(ConvertUtils.tokenPOToDomain(tokenPO)) : Optional.empty();
+        TokenPO tokenExist = tokenPOService.getById(tokenPO.getId());
+        return tokenSaved ? Optional.of(ConvertUtils.tokenPOToDomain(tokenExist)) : Optional.empty();
     }
 
     @Override
     public Optional<Token> update(Token token) {
-
         TokenPO tokenPO = tokenPOService.getById(token.getId());
         tokenPO.setTokenStatus(token.getTokenStatus().toString());
 

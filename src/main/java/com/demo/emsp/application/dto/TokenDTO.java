@@ -2,7 +2,6 @@ package com.demo.emsp.application.dto;
 
 import com.demo.emsp.domain.annotation.ValidTokenStatus;
 import com.demo.emsp.domain.annotation.ValidTokenType;
-import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -19,7 +18,6 @@ public class TokenDTO {
     @ValidTokenStatus(message = "Invalid token status")
     private String tokenStatus;
 
-    @NotBlank(message = "serviceId cannot be blank")
     private String contractId;
 
     private String accountId;
