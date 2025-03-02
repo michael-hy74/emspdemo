@@ -26,7 +26,7 @@ public class TokenController {
         return ResponseEntity.ok(dto);
     }
 
-    @PutMapping("/{tokenId}")
+    @PatchMapping("/{tokenId}")
     public ResponseEntity<TokenDTO> updateTokenStatus(@PathVariable String tokenId, @RequestBody TokenDTO tokenDTO) {
         tokenDTO.setId(tokenId);
         TokenDTO updateDto = tokenAppService.updateTokenStatus(tokenDTO);
@@ -39,7 +39,7 @@ public class TokenController {
         return ResponseEntity.ok(tokenDTO);
     }
 
-    @PutMapping("/assign/{tokenId}")
+    @PatchMapping("/assign/{tokenId}")
     public ResponseEntity<TokenDTO> assignToken(@PathVariable String tokenId, @RequestBody TokenDTO tokenDTO) {
         tokenDTO.setId(tokenId);
         TokenDTO updateDto = tokenAppService.assignToken(tokenDTO);

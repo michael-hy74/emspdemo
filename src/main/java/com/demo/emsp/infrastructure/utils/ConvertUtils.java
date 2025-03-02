@@ -15,7 +15,7 @@ import org.springframework.beans.BeanUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 @Slf4j
 public class ConvertUtils {
@@ -23,42 +23,34 @@ public class ConvertUtils {
     public static Account accountDtoToDomain(AccountDTO dto) {
         Account domain = new Account();
         domain.setId(dto.getId());
-        domain.setServiceId(new ServiceId(dto.getServiceId()));
-        domain.setFleetSolution(new FleetSolution(dto.getFleetSolution()));
+        domain.setServiceId(Optional.ofNullable(dto.getServiceId()).map(ServiceId::new).orElse(null));
+        domain.setFleetSolution(Optional.ofNullable(dto.getFleetSolution()).map(FleetSolution::new).orElse(null));
         domain.setAccountStatus(AccountStatus.fromString(dto.getAccountStatus()));
         domain.setCreatedDate(dto.getCreatedDate());
         domain.setLastUpdated(dto.getLastUpdated());
-        if (null != dto.getTokens() && dto.getTokens().size() > 0) {
-            List<Token> tokens = dto.getTokens().stream()
-                    .map(ConvertUtils::tokenDtoToDomain)
-                    .collect(Collectors.toList());
-            domain.setTokens(tokens);
-        }
         return domain;
     }
 
     public static AccountDTO accountDomainToDto(Account domain) {
         AccountDTO dto = new AccountDTO();
         dto.setId(domain.getId());
-        dto.setServiceId(domain.getServiceId().getValue());
-        dto.setFleetSolution(domain.getFleetSolution().getValue());
+        dto.setServiceId(Optional.ofNullable(domain.getServiceId())
+                .map(ServiceId::getValue).orElse(""));
+        dto.setFleetSolution(Optional.ofNullable(domain.getFleetSolution())
+                .map(FleetSolution::getValue).orElse(""));
         dto.setAccountStatus(domain.getAccountStatus().toString());
         dto.setCreatedDate(domain.getCreatedDate());
         dto.setLastUpdated(domain.getLastUpdated());
-        if (null != domain.getTokens() && domain.getTokens().size() > 0) {
-            List<TokenDTO> tokenDTOS = domain.getTokens().stream()
-                    .map(ConvertUtils::tokenDomainToDto)
-                    .collect(Collectors.toList());
-            dto.setTokens(tokenDTOS);
-        }
         return dto;
     }
 
     public static AccountPO accountDomainToPo(Account domain) {
         AccountPO po = new AccountPO();
         po.setId(domain.getId());
-        po.setServiceId(domain.getServiceId().getValue());
-        po.setFleetSolution(domain.getFleetSolution().getValue());
+        po.setServiceId(Optional.ofNullable(domain.getServiceId())
+                .map(ServiceId::getValue).orElse(""));
+        po.setFleetSolution(Optional.ofNullable(domain.getFleetSolution())
+                .map(FleetSolution::getValue).orElse(""));
         po.setStatus(domain.getAccountStatus().toString());
         po.setCreatedDate(domain.getCreatedDate());
         po.setLastUpdated(domain.getLastUpdated());
@@ -81,8 +73,10 @@ public class ConvertUtils {
         domain.setId(dto.getId());
         domain.setTokenType(TokenType.fromString(dto.getTokenType()));
         domain.setTokenStatus(TokenStatus.fromString(dto.getTokenStatus()));
-        domain.setContractId(new ContractId(dto.getContractId(), TokenType.fromString(dto.getTokenType())));
-        domain.setAccountId(new AccountId(dto.getAccountId()));
+        domain.setContractId(Optional.ofNullable(dto.getContractId())
+                .map(contractId -> new ContractId(dto.getContractId(), TokenType.fromString(dto.getTokenType())))
+                .orElse(null));
+        domain.setAccountId(Optional.ofNullable(dto.getAccountId()).map(AccountId::new).orElse(null));
         domain.setCreatedDate(dto.getCreatedDate());
         domain.setAssignedDate(dto.getAssignedDate());
         domain.setLastUpdated(dto.getLastUpdated());
@@ -107,8 +101,10 @@ public class ConvertUtils {
         po.setId(domain.getId());
         po.setTokenType(domain.getTokenType().toString());
         po.setTokenStatus(domain.getTokenStatus().toString());
-        po.setContractId(domain.getContractId().getValue());
-        po.setAccountId(domain.getAccountId().getValue());
+        po.setContractId(Optional.ofNullable(domain.getContractId())
+                .map(ContractId::getValue).orElse(""));
+        po.setAccountId(Optional.ofNullable(domain.getAccountId())
+                .map(AccountId::getValue).orElse(""));
         po.setCreatedDate(domain.getCreatedDate());
         po.setAssignedDate(domain.getAssignedDate());
         po.setLastUpdated(domain.getLastUpdated());

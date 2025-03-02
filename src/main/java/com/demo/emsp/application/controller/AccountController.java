@@ -24,7 +24,7 @@ public class AccountController {
         return ResponseEntity.ok(dto);
     }
 
-    @PutMapping("/{id}")
+    @PatchMapping("/{id}")
     public ResponseEntity<AccountDTO> updateAccountStatus(@PathVariable String id, @RequestBody AccountDTO accountDTO) {
         accountDTO.setId(id);
         AccountDTO updatedDto = accountAppService.updateAccountStatus(accountDTO);

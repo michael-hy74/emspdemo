@@ -67,15 +67,14 @@ public class TokenRepositoryImpl implements TokenRepository {
 
     @Override
     public IPage<Token> findTokenByLastUpdate(LocalDateTime startTime, LocalDateTime endTime, Integer page, Integer size) {
-        Page<TokenPO> tokenPOPage = new Page<>(page, size);
+        int pageNum = Optional.ofNullable(page).filter(p -> p > 0).orElse(1);
+        int pageSize = Optional.ofNullable(size).filter(s -> s > 0).orElse(10);
+        Page<TokenPO> tokenPOPage = new Page<>(pageNum, pageSize);
 
         QueryWrapper<TokenPO> queryWrapper = new QueryWrapper<>();
-        if (startTime != null) {
-            queryWrapper.ge("last_updated", startTime);
-        }
-        if (endTime != null) {
-            queryWrapper.le("last_updated", endTime);
-        }
+        Optional.ofNullable(startTime).ifPresent(start -> queryWrapper.ge("last_updated", start));
+        Optional.ofNullable(endTime).ifPresent(end -> queryWrapper.le("last_updated", end));
+
         Page<TokenPO> poPage = tokenPOMapper.selectPage(tokenPOPage, queryWrapper);
         return poPage.convert(ConvertUtils::tokenPOToDomain);
     }

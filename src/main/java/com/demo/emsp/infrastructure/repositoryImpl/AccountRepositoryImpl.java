@@ -18,7 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -62,27 +61,24 @@ public class AccountRepositoryImpl implements AccountRepository {
     public Optional<List<Token>> findTokensByAccountId(AccountId id) {
         LambdaQueryWrapper<TokenPO> query = new LambdaQueryWrapper();
         query.eq(TokenPO::getAccountId, id.getValue());
-        List<TokenPO> tokenPOS = tokenPOService.list(query);
-        List<Token> tokens = new ArrayList<>();
-        if (null != tokenPOS && tokenPOS.size() > 0) {
-            tokens = tokenPOS.stream()
+
+        return Optional.ofNullable(tokenPOService.list(query))
+                .filter(list -> !list.isEmpty())
+                .map(list -> list.stream()
                     .map(ConvertUtils::tokenPOToDomain)
-                    .collect(Collectors.toList());
-        }
-        return Optional.of(tokens);
+                    .collect(Collectors.toList()));
     }
 
     @Override
     public IPage<Account> findAccountByLastUpdate(LocalDateTime startTime, LocalDateTime endTime, Integer page, Integer size) {
-        Page<AccountPO> accountPOPage = new Page<>(page, size);
+        int pageNum = Optional.ofNullable(page).filter(p -> p > 0).orElse(1);
+        int pageSize = Optional.ofNullable(size).filter(s -> s > 0).orElse(10);
+        Page<AccountPO> accountPOPage = new Page<>(pageNum, pageSize);
 
         QueryWrapper<AccountPO> queryWrapper = new QueryWrapper<>();
-        if (startTime != null) {
-            queryWrapper.ge("last_updated", startTime);
-        }
-        if (endTime != null) {
-            queryWrapper.le("last_updated", endTime);
-        }
+        Optional.ofNullable(startTime).ifPresent(start -> queryWrapper.ge("last_updated", start));
+        Optional.ofNullable(endTime).ifPresent(end -> queryWrapper.le("last_updated", end));
+
         Page<AccountPO> poPage = accountPOMapper.selectPage(accountPOPage, queryWrapper);
         return poPage.convert(ConvertUtils::accountPOToDomain);
     }

@@ -9,13 +9,10 @@ spring:
 
 
 mybatis-plus:
+  mapper-locations: classpath*:org/jeecg/modules/**/xml/*Mapper.xml
   global-config:
     db-config:
-      id-type: assign_id
-
-
-logging:
-  level:
-    com:
-      baomidou:
-        mybatisplus: debug
+      id-type: ASSIGN_ID
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    call-setters-on-nulls: true

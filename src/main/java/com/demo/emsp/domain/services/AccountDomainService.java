@@ -10,10 +10,10 @@ import com.demo.emsp.domain.values.TokenId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 
 @Service
@@ -29,22 +29,21 @@ public class AccountDomainService {
         Account accountSaved = accountRepository.save(account)
                 .orElseThrow(() -> new RuntimeException("Account saved failed"));
 
-        accountSaved = accountRepository.findById(new AccountId(accountSaved.getId()))
-                .orElseThrow(() -> new RuntimeException("Account saved failed"));
+        AccountId accountIdExisted = new AccountId(accountSaved.getId());
 
-        List<Token> tokenSavedList = new ArrayList<>();
-        if (null != account.getTokens() && account.getTokens().size() > 0) {
-            List<Token> tokens = account.getTokens();
-            for (Token token : tokens) {
-                token.setAccountId(new AccountId(accountSaved.getId()));
-                token.setAssignedDate(LocalDateTime.now());
-                Token tokenSaved = tokenRepository.save(token).orElse(null);
-                if (null != tokenSaved) {
-                    tokenSavedList.add(tokenSaved);
-                }
-            }
-        }
-        tokenSavedList = accountRepository.findTokensByAccountId(new AccountId(accountSaved.getId()))
+        accountSaved = accountRepository.findById(accountIdExisted)
+                .orElseThrow(() -> new RuntimeException("Get exist Account failed"));
+
+
+        Optional.ofNullable(account.getTokens())
+                .orElse(Collections.emptyList())
+                .forEach(token -> {
+                    token.setAccountId(accountIdExisted);
+                    Optional<Token> tokenSaved = tokenRepository.save(token);
+                    tokenSaved.orElseThrow(() -> new RuntimeException("Token saved failed"));
+                });
+
+        List<Token> tokenSavedList = accountRepository.findTokensByAccountId(accountIdExisted)
                 .orElse(new ArrayList<>());
         accountSaved.setTokens(tokenSavedList);
         return accountSaved;
