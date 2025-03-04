@@ -15,7 +15,7 @@ public class TokenDomainService {
     public Token saveToken(Token token) {
         token.setValue(token.generateTokenByType(token.getTokenType()));
         Token tokenSaved = tokenRepository.save(token)
-                .orElseThrow(() -> new RuntimeException("Account saved failed"));
+                .orElseThrow(() -> new RuntimeException("Token saved failed"));
         return tokenSaved;
     }
 

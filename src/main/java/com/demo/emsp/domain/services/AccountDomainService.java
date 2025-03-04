@@ -10,13 +10,9 @@ import com.demo.emsp.domain.values.AccountId;
 import com.demo.emsp.domain.values.TokenId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 
 @Service
@@ -55,7 +51,6 @@ public class AccountDomainService {
         return accountGetNew;
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public Account assignToken(Token token) {
         Token tokenExist = tokenRepository.findById(new TokenId(token.getId()))
                 .orElseThrow(() -> new RuntimeException("Token Not existed"));
@@ -63,7 +58,7 @@ public class AccountDomainService {
         Account accountExist = getAccount(token.getAccountId());
 
         if (accountExist.getAccountStatus() != AccountStatus.ACTIVATED) {
-            throw new IllegalStateException("Token must be assign to ACTIVATED Account.");
+            throw new IllegalStateException("Token must be assign to ACTIVATED Account");
         }
 
         tokenExist.setAccountId(token.getAccountId());
@@ -80,7 +75,7 @@ public class AccountDomainService {
 
     public Account getAccount(AccountId accountId) {
         Account account = accountRepository.findById(accountId)
-                .orElseThrow(() -> new RuntimeException("Account not found"));
+                .orElseThrow(() -> new RuntimeException("Account Not existed"));
 
         List<Token> tokens = accountRepository.findTokensByAccountId(accountId)
                 .orElse(new ArrayList<>());
