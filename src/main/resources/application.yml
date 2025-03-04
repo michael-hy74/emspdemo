@@ -2,7 +2,7 @@ spring:
   application:
     name: emsp
   datasource:
-    url: jdbc:mysql://13.250.106.33:3306/emsp_db?useSSL=false&serverTimezone=Asia/Shanghai&characterEncoding=UTF-8&useUnicode=true&tinyInt1isBit=false&allowPublicKeyRetrieval=true
+    url: jdbc:mysql://18.141.13.203:3306/emsp_db?useSSL=false&serverTimezone=Asia/Shanghai&characterEncoding=UTF-8&useUnicode=true&tinyInt1isBit=false&allowPublicKeyRetrieval=true
     username: root
     password: admin123456
     driver-class-name: com.mysql.cj.jdbc.Driver
