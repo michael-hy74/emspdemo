@@ -1,12 +1,12 @@
 package com.demo.emsp.domain.entity;
 
 import com.demo.emsp.domain.enums.AccountStatus;
-import com.demo.emsp.domain.values.FleetSolution;
-import com.demo.emsp.domain.values.ServiceId;
+import com.demo.emsp.domain.values.*;
 import lombok.Data;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 /***
  * Account Entity -- root
@@ -16,6 +16,7 @@ public class Account {
     private String id;
     private ServiceId serviceId;
     private FleetSolution fleetSolution;
+    private ContractId contractId;
     private AccountStatus accountStatus;
     private LocalDateTime createdDate;
     private LocalDateTime lastUpdated;
@@ -37,4 +38,13 @@ public class Account {
         this.lastUpdated = LocalDateTime.now();
     }
 
+    public Account checkAndGenerateContractId(Account account) {
+        account.setContractId(Optional.ofNullable(account.getContractId())
+                .map(ContractId::getValue)
+                .filter(value -> value != null && !value.isEmpty())
+                .map(value -> new ContractId(value))
+                .orElseGet(() -> new ContractId(EMAID.generateEMAID())));
+        return account;
+    }
 }
+

@@ -15,8 +15,6 @@ public interface TokenRepository {
 
     Optional<Token> findById(TokenId id);
 
-    Optional<Token> assignToken(Token token);
-
     IPage<Token> findTokenByLastUpdate(LocalDateTime startTime, LocalDateTime endTime, Integer page, Integer size);
 
 

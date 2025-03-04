@@ -30,39 +30,23 @@ public class TokenRepositoryImpl implements TokenRepository {
     public Optional<Token> save(Token token) {
         TokenPO tokenPO = ConvertUtils.tokenDomainToPo(token);
         boolean tokenSaved = tokenPOService.save(tokenPO);
-        TokenPO tokenExist = tokenPOService.getById(tokenPO.getId());
-        return tokenSaved ? Optional.of(ConvertUtils.tokenPOToDomain(tokenExist)) : Optional.empty();
+        tokenPO = tokenPOService.getById(tokenPO.getId());
+        return tokenSaved ? Optional.of(ConvertUtils.tokenPOToDomain(tokenPO)) : Optional.empty();
     }
 
     @Override
     public Optional<Token> update(Token token) {
-        TokenPO tokenPO = tokenPOService.getById(token.getId());
-        tokenPO.setTokenStatus(token.getTokenStatus().toString());
-
+        TokenPO tokenPO = ConvertUtils.tokenDomainToPo(token);
         LambdaQueryWrapper<TokenPO> query = new LambdaQueryWrapper();
         query.eq(TokenPO::getId, token.getId());
-        boolean accountSaved = tokenPOService.update(tokenPO, query);
-        return accountSaved ? Optional.of(ConvertUtils.tokenPOToDomain(tokenPO)) : Optional.empty();
+        boolean tokenSaved = tokenPOService.update(tokenPO, query);
+        return tokenSaved ? Optional.of(ConvertUtils.tokenPOToDomain(tokenPO)) : Optional.empty();
     }
 
     @Override
     public Optional<Token> findById(TokenId id) {
         TokenPO tokenPO = tokenPOService.getById(id.getValue());
-        Token token = ConvertUtils.tokenPOToDomain(tokenPO);
-        return Optional.of(token);
-    }
-
-    @Override
-    public Optional<Token> assignToken(Token token) {
-        TokenPO tokenPO = tokenPOService.getById(token.getId());
-        tokenPO.setAssignedDate(LocalDateTime.now());
-        tokenPO.setAccountId(token.getAccountId().getValue());
-        tokenPO.setTokenStatus(token.getTokenStatus().toString());
-
-        LambdaQueryWrapper<TokenPO> query = new LambdaQueryWrapper();
-        query.eq(TokenPO::getId, token.getId());
-        boolean accountSaved = tokenPOService.update(tokenPO, query);
-        return accountSaved ? Optional.of(ConvertUtils.tokenPOToDomain(tokenPO)) : Optional.empty();
+        return Optional.of(ConvertUtils.tokenPOToDomain(tokenPO));
     }
 
     @Override

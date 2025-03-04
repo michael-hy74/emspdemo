@@ -22,8 +22,8 @@ public class TokenPO {
     @TableField("status")
     private String tokenStatus;
 
-    @TableField("contract_id")
-    private String contractId;
+    @TableField("value")
+    private String value;
 
     @TableField("account_id")
     private String accountId;

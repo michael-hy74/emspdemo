@@ -18,7 +18,7 @@ public class TokenDTO {
     @ValidTokenStatus(message = "Invalid token status")
     private String tokenStatus;
 
-    private String contractId;
+    private String value;
 
     private String accountId;
 

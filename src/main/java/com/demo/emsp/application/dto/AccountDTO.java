@@ -18,6 +18,8 @@ public class AccountDTO {
     @NotBlank(message = "fleetSolution cannot be blank")
     private String fleetSolution;
 
+    private String contractId;
+
     @ValidAccountStatus(message = "Invalid account status")
     private String accountStatus;
 

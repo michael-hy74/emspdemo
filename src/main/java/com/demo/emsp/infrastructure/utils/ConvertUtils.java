@@ -25,6 +25,7 @@ public class ConvertUtils {
         domain.setId(dto.getId());
         domain.setServiceId(Optional.ofNullable(dto.getServiceId()).map(ServiceId::new).orElse(null));
         domain.setFleetSolution(Optional.ofNullable(dto.getFleetSolution()).map(FleetSolution::new).orElse(null));
+        domain.setContractId(Optional.ofNullable(dto.getContractId()).map(ContractId::new).orElse(null));
         domain.setAccountStatus(AccountStatus.fromString(dto.getAccountStatus()));
         domain.setCreatedDate(dto.getCreatedDate());
         domain.setLastUpdated(dto.getLastUpdated());
@@ -34,10 +35,9 @@ public class ConvertUtils {
     public static AccountDTO accountDomainToDto(Account domain) {
         AccountDTO dto = new AccountDTO();
         dto.setId(domain.getId());
-        dto.setServiceId(Optional.ofNullable(domain.getServiceId())
-                .map(ServiceId::getValue).orElse(""));
-        dto.setFleetSolution(Optional.ofNullable(domain.getFleetSolution())
-                .map(FleetSolution::getValue).orElse(""));
+        dto.setServiceId(Optional.ofNullable(domain.getServiceId()).map(ServiceId::getValue).orElse(""));
+        dto.setFleetSolution(Optional.ofNullable(domain.getFleetSolution()).map(FleetSolution::getValue).orElse(""));
+        dto.setContractId(Optional.ofNullable(domain.getContractId()).map(ContractId::getValue).orElse(""));
         dto.setAccountStatus(domain.getAccountStatus().toString());
         dto.setCreatedDate(domain.getCreatedDate());
         dto.setLastUpdated(domain.getLastUpdated());
@@ -47,10 +47,9 @@ public class ConvertUtils {
     public static AccountPO accountDomainToPo(Account domain) {
         AccountPO po = new AccountPO();
         po.setId(domain.getId());
-        po.setServiceId(Optional.ofNullable(domain.getServiceId())
-                .map(ServiceId::getValue).orElse(""));
-        po.setFleetSolution(Optional.ofNullable(domain.getFleetSolution())
-                .map(FleetSolution::getValue).orElse(""));
+        po.setServiceId(Optional.ofNullable(domain.getServiceId()).map(ServiceId::getValue).orElse(""));
+        po.setFleetSolution(Optional.ofNullable(domain.getFleetSolution()).map(FleetSolution::getValue).orElse(""));
+        po.setContractId(Optional.ofNullable(domain.getContractId()).map(ContractId::getValue).orElse(""));
         po.setStatus(domain.getAccountStatus().toString());
         po.setCreatedDate(domain.getCreatedDate());
         po.setLastUpdated(domain.getLastUpdated());
@@ -62,6 +61,7 @@ public class ConvertUtils {
         domain.setId(po.getId());
         domain.setServiceId(new ServiceId(po.getServiceId()));
         domain.setFleetSolution(new FleetSolution(po.getFleetSolution()));
+        domain.setContractId(new ContractId(po.getContractId()));
         domain.setAccountStatus(AccountStatus.fromString(po.getStatus()));
         domain.setCreatedDate(po.getCreatedDate());
         domain.setLastUpdated(po.getLastUpdated());
@@ -73,9 +73,7 @@ public class ConvertUtils {
         domain.setId(dto.getId());
         domain.setTokenType(TokenType.fromString(dto.getTokenType()));
         domain.setTokenStatus(TokenStatus.fromString(dto.getTokenStatus()));
-        domain.setContractId(Optional.ofNullable(dto.getContractId())
-                .map(contractId -> new ContractId(dto.getContractId(), TokenType.fromString(dto.getTokenType())))
-                .orElse(null));
+        domain.setValue(dto.getValue());
         domain.setAccountId(Optional.ofNullable(dto.getAccountId()).map(AccountId::new).orElse(null));
         domain.setCreatedDate(dto.getCreatedDate());
         domain.setAssignedDate(dto.getAssignedDate());
@@ -88,7 +86,7 @@ public class ConvertUtils {
         dto.setId(domain.getId());
         dto.setTokenType(domain.getTokenType().toString());
         dto.setTokenStatus(domain.getTokenStatus().toString());
-        dto.setContractId(domain.getContractId().getValue());
+        dto.setValue(domain.getValue());
         dto.setAccountId(domain.getAccountId().getValue());
         dto.setCreatedDate(domain.getCreatedDate());
         dto.setAssignedDate(domain.getAssignedDate());
@@ -101,10 +99,8 @@ public class ConvertUtils {
         po.setId(domain.getId());
         po.setTokenType(domain.getTokenType().toString());
         po.setTokenStatus(domain.getTokenStatus().toString());
-        po.setContractId(Optional.ofNullable(domain.getContractId())
-                .map(ContractId::getValue).orElse(""));
-        po.setAccountId(Optional.ofNullable(domain.getAccountId())
-                .map(AccountId::getValue).orElse(""));
+        po.setValue(domain.getValue());
+        po.setAccountId(Optional.ofNullable(domain.getAccountId()).map(AccountId::getValue).orElse(""));
         po.setCreatedDate(domain.getCreatedDate());
         po.setAssignedDate(domain.getAssignedDate());
         po.setLastUpdated(domain.getLastUpdated());
@@ -116,7 +112,7 @@ public class ConvertUtils {
         domain.setId(po.getId());
         domain.setTokenType(TokenType.fromString(po.getTokenType()));
         domain.setTokenStatus(TokenStatus.fromString(po.getTokenStatus()));
-        domain.setContractId(new ContractId(po.getContractId(), TokenType.fromString(po.getTokenType())));
+        domain.setValue(po.getValue());
         domain.setAccountId(new AccountId(po.getAccountId()));
         domain.setCreatedDate(po.getCreatedDate());
         domain.setAssignedDate(po.getAssignedDate());

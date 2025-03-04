@@ -21,6 +21,9 @@ public class AccountPO {
     @TableField("fleet_solution")
     private String fleetSolution;
 
+    @TableField("contract_id")
+    private String contractId;
+
     @TableField("status")
     private String status;
 

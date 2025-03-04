@@ -7,10 +7,11 @@ import com.demo.emsp.domain.enums.TokenStatus;
 import com.demo.emsp.domain.repository.AccountRepository;
 import com.demo.emsp.domain.repository.TokenRepository;
 import com.demo.emsp.domain.values.AccountId;
-import com.demo.emsp.domain.values.ContractId;
 import com.demo.emsp.domain.values.TokenId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -28,26 +29,8 @@ public class AccountDomainService {
     private TokenRepository tokenRepository;
 
     public Account saveAccount(Account account) {
-        Account accountSaved = accountRepository.save(account)
+        Account accountSaved = accountRepository.save(account.checkAndGenerateContractId(account))
                 .orElseThrow(() -> new RuntimeException("Account saved failed"));
-
-        AccountId accountIdExisted = new AccountId(accountSaved.getId());
-
-        accountSaved = accountRepository.findById(accountIdExisted)
-                .orElseThrow(() -> new RuntimeException("Get exist Account failed"));
-
-        Optional.ofNullable(account.getTokens())
-                .orElse(Collections.emptyList())
-                .forEach(token -> {
-                    token.setAccountId(accountIdExisted);
-                    token.setContractId(ContractId.generate(token.getTokenType()));
-                    Optional<Token> tokenSaved = tokenRepository.save(token);
-                    tokenSaved.orElseThrow(() -> new RuntimeException("Token saved failed"));
-                });
-
-        List<Token> tokenSavedList = accountRepository.findTokensByAccountId(accountIdExisted)
-                .orElse(new ArrayList<>());
-        accountSaved.setTokens(tokenSavedList);
         return accountSaved;
     }
 
@@ -72,34 +55,12 @@ public class AccountDomainService {
         return accountGetNew;
     }
 
-    public Token updateTokenStatus(Token token) {
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public Account assignToken(Token token) {
         Token tokenExist = tokenRepository.findById(new TokenId(token.getId()))
                 .orElseThrow(() -> new RuntimeException("Token Not existed"));
 
-        switch (token.getTokenStatus()) {
-            case ACTIVATED:
-                tokenExist.activate();
-                break;
-            case DEACTIVATED:
-                tokenExist.deactivate();
-                break;
-            default:
-                throw new IllegalArgumentException("Invalid token status: " + token.getTokenStatus());
-        }
-        tokenRepository.update(tokenExist)
-                .orElseThrow(() -> new RuntimeException("Token Update Failed"));
-
-        Token tokenGetNew = tokenRepository.findById(new TokenId(token.getId()))
-                .orElseThrow(() -> new RuntimeException("Token Get Failed"));
-        return tokenGetNew;
-    }
-
-    public Token assignToken(Token token) {
-        Token tokenExist = tokenRepository.findById(new TokenId(token.getId()))
-                .orElseThrow(() -> new RuntimeException("Token Not existed"));
-
-        Account accountExist = accountRepository.findById(token.getAccountId())
-                .orElseThrow(() -> new RuntimeException("Account Not existed"));
+        Account accountExist = getAccount(token.getAccountId());
 
         if (accountExist.getAccountStatus() != AccountStatus.ACTIVATED) {
             throw new IllegalStateException("Token must be assign to ACTIVATED Account.");
@@ -107,13 +68,14 @@ public class AccountDomainService {
 
         tokenExist.setAccountId(token.getAccountId());
         tokenExist.setTokenStatus(TokenStatus.ASSIGNED);
-        tokenRepository.assignToken(tokenExist)
+        tokenRepository.update(tokenExist)
                 .orElseThrow(() -> new RuntimeException("Token Update Failed"));
 
-        Token tokenGetNew = tokenRepository.findById(new TokenId(token.getId()))
-                .orElseThrow(() -> new RuntimeException("Token Get Failed"));
+        Token tokenSaved = tokenRepository.findById(new TokenId(token.getId()))
+                .orElseThrow(() -> new RuntimeException("Token Not existed"));
 
-        return tokenGetNew;
+        accountExist.getTokens().add(tokenSaved);
+        return accountExist;
     }
 
     public Account getAccount(AccountId accountId) {
@@ -121,14 +83,9 @@ public class AccountDomainService {
                 .orElseThrow(() -> new RuntimeException("Account not found"));
 
         List<Token> tokens = accountRepository.findTokensByAccountId(accountId)
-                .orElse(Collections.emptyList());
+                .orElse(new ArrayList<>());
         account.setTokens(tokens);
         return account;
     }
 
-    public Token getToken(TokenId tokenId) {
-        Token token = tokenRepository.findById(tokenId)
-                .orElseThrow(() -> new RuntimeException("Token not found"));
-        return token;
-    }
 }

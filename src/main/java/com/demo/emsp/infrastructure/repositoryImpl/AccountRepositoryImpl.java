@@ -38,6 +38,7 @@ public class AccountRepositoryImpl implements AccountRepository {
     public Optional<Account> save(Account account) {
         AccountPO accountPO = ConvertUtils.accountDomainToPo(account);
         boolean accountSaved = accountPOServices.save(accountPO);
+        accountPO = accountPOServices.getById(accountPO.getId());
         return accountSaved ? Optional.of(ConvertUtils.accountPOToDomain(accountPO)) : Optional.empty();
     }
 
@@ -53,8 +54,7 @@ public class AccountRepositoryImpl implements AccountRepository {
     @Override
     public Optional<Account> findById(AccountId id) {
         AccountPO accountPO = accountPOServices.getById(id.getValue());
-        Account account = ConvertUtils.accountPOToDomain(accountPO);
-        return Optional.of(account);
+        return Optional.of(ConvertUtils.accountPOToDomain(accountPO));
     }
 
     @Override
@@ -65,8 +65,8 @@ public class AccountRepositoryImpl implements AccountRepository {
         return Optional.ofNullable(tokenPOService.list(query))
                 .filter(list -> !list.isEmpty())
                 .map(list -> list.stream()
-                    .map(ConvertUtils::tokenPOToDomain)
-                    .collect(Collectors.toList()));
+                        .map(ConvertUtils::tokenPOToDomain)
+                        .collect(Collectors.toList()));
     }
 
     @Override
