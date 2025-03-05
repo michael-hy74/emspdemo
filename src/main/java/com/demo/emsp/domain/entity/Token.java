@@ -6,6 +6,7 @@ import com.demo.emsp.domain.values.*;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 
 /***
@@ -23,17 +24,17 @@ public class Token {
     private LocalDateTime lastUpdated;
 
     public void activate() {
-        if (this.tokenStatus != TokenStatus.ASSIGNED) {
-            throw new IllegalStateException("Token must be ASSIGNED to ACTIVATED.");
-        }
+        Optional.ofNullable(this.tokenStatus)
+                .filter(status -> status == TokenStatus.ASSIGNED)
+                .orElseThrow(() -> new IllegalStateException("Token must be ASSIGNED to ACTIVATED."));
         this.tokenStatus = TokenStatus.ACTIVATED;
         this.lastUpdated = LocalDateTime.now();
     }
 
     public void deactivate() {
-        if (this.tokenStatus != TokenStatus.ACTIVATED) {
-            throw new IllegalStateException("Token must be ACTIVATED to deactivate.");
-        }
+        Optional.ofNullable(this.tokenStatus)
+                .filter(status -> status == TokenStatus.ACTIVATED)
+                .orElseThrow(() -> new IllegalStateException("Token must be ACTIVATED to deactivate."));
         this.tokenStatus = TokenStatus.DEACTIVATED;
         this.lastUpdated = LocalDateTime.now();
     }
@@ -47,7 +48,7 @@ public class Token {
         }
     }
 
-    public static String generateTokenByType(TokenType type) {
+    public String generateTokenByType(TokenType type) {
         String generatedValue = switch (type) {
             case EMAID -> EMAID.generateEMAID();
             case RFID -> RFID.generateRFID();
@@ -55,5 +56,13 @@ public class Token {
             default -> throw new IllegalArgumentException("Unsupported TokenType");
         };
         return generatedValue;
+    }
+
+    public void assignTo(AccountId accountId) {
+        Optional.ofNullable(this.tokenStatus)
+                .filter(status -> status == TokenStatus.CREATED)
+                .orElseThrow(() -> new IllegalStateException("Only CREATED token can be assigned"));
+        this.accountId = accountId;
+        this.tokenStatus = TokenStatus.ASSIGNED;
     }
 }

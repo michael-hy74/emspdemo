@@ -1,18 +1,24 @@
 package com.demo.emsp.domain.services;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.demo.emsp.domain.entity.Account;
 import com.demo.emsp.domain.entity.Token;
 import com.demo.emsp.domain.enums.AccountStatus;
-import com.demo.emsp.domain.enums.TokenStatus;
+import com.demo.emsp.domain.events.AssignedTokenEvent;
+import com.demo.emsp.domain.events.AssignedTokenPublisher;
 import com.demo.emsp.domain.repository.AccountRepository;
 import com.demo.emsp.domain.repository.TokenRepository;
 import com.demo.emsp.domain.values.AccountId;
 import com.demo.emsp.domain.values.TokenId;
+import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 
 @Service
@@ -23,6 +29,12 @@ public class AccountDomainService {
 
     @Autowired
     private TokenRepository tokenRepository;
+
+    @Resource
+    private AssignedTokenPublisher assignedTokenPublisher;
+
+    @Autowired
+    private ApplicationEventPublisher ventPublisher;
 
     public Account saveAccount(Account account) {
         Account accountSaved = accountRepository.save(account.checkAndGenerateContractId(account))
@@ -57,12 +69,12 @@ public class AccountDomainService {
 
         Account accountExist = getAccount(token.getAccountId());
 
-        if (accountExist.getAccountStatus() != AccountStatus.ACTIVATED) {
-            throw new IllegalStateException("Token must be assign to ACTIVATED Account");
-        }
+        Optional.ofNullable(accountExist.getAccountStatus())
+                .filter(status -> status == AccountStatus.ACTIVATED)
+                .orElseThrow(() -> new IllegalStateException("Token must be assign to ACTIVATED Account"));
 
-        tokenExist.setAccountId(token.getAccountId());
-        tokenExist.setTokenStatus(TokenStatus.ASSIGNED);
+        tokenExist.assignTo(new AccountId(accountExist.getId()));
+
         tokenRepository.update(tokenExist)
                 .orElseThrow(() -> new RuntimeException("Token Update Failed"));
 
@@ -70,6 +82,12 @@ public class AccountDomainService {
                 .orElseThrow(() -> new RuntimeException("Token Not existed"));
 
         accountExist.getTokens().add(tokenSaved);
+
+        AssignedTokenEvent assignedTokenEvent = new AssignedTokenEvent(this,
+                new TokenId(tokenSaved.getId()), new AccountId(accountExist.getId()));
+
+        assignedTokenPublisher.publish(assignedTokenEvent);
+
         return accountExist;
     }
 
@@ -81,6 +99,11 @@ public class AccountDomainService {
                 .orElse(new ArrayList<>());
         account.setTokens(tokens);
         return account;
+    }
+
+    public IPage<Account> findAccountByLastUpdate(
+            LocalDateTime startTime, LocalDateTime endTime, Integer page, Integer size) {
+        return accountRepository.findAccountByLastUpdate(startTime, endTime, page, size);
     }
 
 }

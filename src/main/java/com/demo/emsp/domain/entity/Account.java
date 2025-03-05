@@ -23,17 +23,17 @@ public class Account {
     private List<Token> tokens;
 
     public void activate() {
-        if (this.accountStatus != AccountStatus.CREATED) {
-            throw new IllegalStateException("Account must be CREATED to activate.");
-        }
+        Optional.ofNullable(this.accountStatus)
+                .filter(status -> status == AccountStatus.CREATED)
+                .orElseThrow(() -> new IllegalStateException("Account must be CREATED to activate."));
         this.accountStatus = AccountStatus.ACTIVATED;
         this.lastUpdated = LocalDateTime.now();
     }
 
     public void deactivate() {
-        if (this.accountStatus != AccountStatus.ACTIVATED) {
-            throw new IllegalStateException("Account must be ACTIVATED to deactivate.");
-        }
+        Optional.ofNullable(this.accountStatus)
+                .filter(status -> status == AccountStatus.ACTIVATED)
+                .orElseThrow(() -> new IllegalStateException("Account must be ACTIVATED to deactivate."));
         this.accountStatus = AccountStatus.DEACTIVATED;
         this.lastUpdated = LocalDateTime.now();
     }
@@ -45,6 +45,19 @@ public class Account {
                 .map(value -> new ContractId(value))
                 .orElseGet(() -> new ContractId(EMAID.generateEMAID())));
         return account;
+    }
+
+    public Account assignToken(Token token){
+        Optional.ofNullable(this.accountStatus)
+                .filter(status -> status == AccountStatus.ACTIVATED)
+                .orElseThrow(() -> new IllegalStateException("Token must be assign to ACTIVATED Account"));
+        token.assignTo(new AccountId(this.id));
+        this.tokens.add(token);
+        return this;
+    }
+
+    public void addToken(Token token){
+        this.tokens.add(token);
     }
 }
 

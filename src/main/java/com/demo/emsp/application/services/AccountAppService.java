@@ -3,7 +3,6 @@ package com.demo.emsp.application.services;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.demo.emsp.domain.entity.Account;
 import com.demo.emsp.domain.entity.Token;
-import com.demo.emsp.domain.repository.AccountRepository;
 import com.demo.emsp.domain.services.AccountDomainService;
 import com.demo.emsp.domain.values.AccountId;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,9 +15,6 @@ import java.time.LocalDateTime;
 public class AccountAppService {
     @Autowired
     private AccountDomainService accountDomainService;
-
-    @Autowired
-    private AccountRepository accountRepository;
 
     @Transactional
     public Account createAccount(Account account) {
@@ -41,7 +37,8 @@ public class AccountAppService {
     }
 
     @Transactional
-    public IPage<Account> findAccountByLastUpdate(LocalDateTime startTime, LocalDateTime endTime, Integer page, Integer size) {
-        return accountRepository.findAccountByLastUpdate(startTime, endTime, page, size);
+    public IPage<Account> findAccountByLastUpdate(
+            LocalDateTime startTime, LocalDateTime endTime, Integer page, Integer size) {
+        return accountDomainService.findAccountByLastUpdate(startTime, endTime, page, size);
     }
 }

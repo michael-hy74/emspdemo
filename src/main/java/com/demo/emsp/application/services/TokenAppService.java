@@ -17,9 +17,6 @@ public class TokenAppService {
     @Autowired
     private TokenDomainService tokenDomainService;
 
-    @Autowired
-    private TokenRepository tokenRepository;
-
     @Transactional
     public Token createToken(Token token) {
         return tokenDomainService.saveToken(token);
@@ -36,7 +33,8 @@ public class TokenAppService {
     }
 
     @Transactional
-    public IPage<Token> findTokenByLastUpdate(LocalDateTime startTime, LocalDateTime endTime, Integer page, Integer size) {
-        return tokenRepository.findTokenByLastUpdate(startTime, endTime, page, size);
+    public IPage<Token> findTokenByLastUpdate(
+            LocalDateTime startTime, LocalDateTime endTime, Integer page, Integer size) {
+        return tokenDomainService.findTokenByLastUpdate(startTime, endTime, page, size);
     }
 }
