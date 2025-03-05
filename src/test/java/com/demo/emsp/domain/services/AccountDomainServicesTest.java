@@ -5,6 +5,8 @@ import com.demo.emsp.domain.entity.Token;
 import com.demo.emsp.domain.enums.AccountStatus;
 import com.demo.emsp.domain.enums.TokenStatus;
 import com.demo.emsp.domain.enums.TokenType;
+import com.demo.emsp.domain.events.AssignedTokenEvent;
+import com.demo.emsp.domain.events.AssignedTokenPublisher;
 import com.demo.emsp.domain.repository.AccountRepository;
 import com.demo.emsp.domain.repository.TokenRepository;
 import com.demo.emsp.domain.values.AccountId;
@@ -15,10 +17,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
+import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -39,6 +38,9 @@ public class AccountDomainServicesTest {
 
     @Mock
     private TokenRepository tokenRepository;
+
+    @Mock
+    private AssignedTokenPublisher assignedTokenPublisher;
 
     @InjectMocks
     private AccountDomainService accountDomainService;
@@ -166,7 +168,7 @@ public class AccountDomainServicesTest {
         tokenExist.setId(tokenId);
         tokenExist.setAccountId(new AccountId(accountId));
         tokenExist.setTokenType(TokenType.RFID);
-        tokenExist.setTokenStatus(TokenStatus.ASSIGNED);
+        tokenExist.setTokenStatus(TokenStatus.CREATED);
 
         List<Token> tokenList = new ArrayList<>();
         tokenList.add(tokenExist);
@@ -178,9 +180,12 @@ public class AccountDomainServicesTest {
         tokenRequest.setTokenType(TokenType.RFID);
         tokenRequest.setTokenStatus(TokenStatus.CREATED);
 
+        AssignedTokenEvent assignedTokenEvent = new AssignedTokenEvent(this, new TokenId(tokenId), new AccountId(accountId));
+
         Mockito.when(tokenRepository.findById(new TokenId(tokenId))).thenReturn(Optional.of(tokenExist));
         Mockito.when(accountRepository.findById(new AccountId(accountId))).thenReturn(Optional.of(accountExist));
         Mockito.when(tokenRepository.update(any(Token.class))).thenReturn(Optional.of(tokenExist));
+
 
         Account updatedAccount = accountDomainService.assignToken(tokenRequest);
 
@@ -190,6 +195,14 @@ public class AccountDomainServicesTest {
 
         Mockito.verify(tokenRepository, Mockito.times(2)).findById(new TokenId(tokenId));
         Mockito.verify(accountRepository, Mockito.times(1)).findById(new AccountId(accountId));
+
+        Mockito.verify(assignedTokenPublisher).publish(
+                ArgumentMatchers.argThat(event ->
+                        event instanceof AssignedTokenEvent &&
+                                ((AssignedTokenEvent) event).getTokenId().getValue().equals(tokenId) &&
+                                ((AssignedTokenEvent) event).getAccountId().getValue().equals(accountId)
+                )
+        );
     }
 
     @Test
@@ -204,7 +217,7 @@ public class AccountDomainServicesTest {
         tokenExist.setId(tokenId);
         tokenExist.setAccountId(new AccountId(accountId));
         tokenExist.setTokenType(TokenType.RFID);
-        tokenExist.setTokenStatus(TokenStatus.ASSIGNED);
+        tokenExist.setTokenStatus(TokenStatus.CREATED);
 
         List<Token> tokenList = new ArrayList<>();
         tokenList.add(tokenExist);
